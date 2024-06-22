@@ -9,3 +9,5 @@ MENTOR: G.SRAVANI
 
 TASK-2 : LIBRARY MANAGEMENT SYSTEM
 OUTPUT:
+![Screenshot (12)](https://github.com/Anjali10001/CODETECH-Task-2/assets/171924324/95c857be-5a65-49fd-9c86-730675a8d45f)
+
