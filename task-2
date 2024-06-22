@@ -1,0 +1,140 @@
+from datetime import datetime, timedelta
+
+# Define Item class and its subclasses
+class Item:
+    def __init__(self, title, author, category, item_id):
+        self.title = title
+        self.author = author
+        self.category = category
+        self.item_id = item_id
+        self.is_checked_out = False
+        self.due_date = None
+
+    def __str__(self):
+        status = "Available" if not self.is_checked_out else f"Checked out, Due: {self.due_date.strftime('%Y-%m-%d')}"
+        return f"ID: {self.item_id}, Title: {self.title}, Author: {self.author}, Category: {self.category}, Status: {status}"
+
+class Book(Item):
+    pass
+
+class Magazine(Item):
+    pass
+
+class DVD(Item):
+    pass
+
+# Library management system
+class Library:
+    def __init__(self):
+        self.items = []
+        self.checked_out_items = {}
+
+    def add_item(self, item):
+        self.items.append(item)
+        print(f"'{item.title}' by {item.author} added to the library.")
+
+    def check_out_item(self, item_id, checkout_duration_days=14):
+        item = self.find_item_by_id(item_id)
+        if item and not item.is_checked_out:
+            item.is_checked_out = True
+            item.due_date = datetime.now() + timedelta(days=checkout_duration_days)
+            self.checked_out_items[item_id] = item
+            print(f"'{item.title}' checked out successfully. Due date: {item.due_date.strftime('%Y-%m-%d')}.")
+        elif item and item.is_checked_out:
+            print(f"'{item.title}' is already checked out.")
+        else:
+            print("Item not found.")
+
+    def return_item(self, item_id):
+        item = self.checked_out_items.pop(item_id, None)
+        if item:
+            item.is_checked_out = False
+            item.due_date = None
+            print(f"'{item.title}' returned successfully.")
+        else:
+            print("Item not found in checked out list.")
+
+    def manage_overdue_fines(self, fine_per_day=1):
+        print("Overdue Items and Fines:")
+        for item_id, item in self.checked_out_items.items():
+            if item.due_date and datetime.now() > item.due_date:
+                overdue_days = (datetime.now() - item.due_date).days
+                fine = overdue_days * fine_per_day
+                print(f"'{item.title}' is overdue by {overdue_days} days. Fine: ${fine:.2f}.")
+
+    def search_items(self, search_term, search_type='title'):
+        results = []
+        for item in self.items:
+            if (search_type == 'title' and search_term.lower() in item.title.lower()) or \
+               (search_type == 'author' and search_term.lower() in item.author.lower()) or \
+               (search_type == 'category' and search_term.lower() in item.category.lower()):
+                results.append(item)
+        return results
+
+    def find_item_by_id(self, item_id):
+        for item in self.items:
+            if item.item_id == item_id:
+                return item
+        return None
+
+# Command-line interface
+def main():
+    library = Library()
+
+    while True:
+        print("\nLibrary Management System")
+        print("1. Add Item")
+        print("2. Check Out Item")
+        print("3. Return Item")
+        print("4. Manage Overdue Fines")
+        print("5. Search Items")
+        print("6. Exit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            item_type = input("Enter item type (book/magazine/dvd): ").lower()
+            title = input("Enter title: ")
+            author = input("Enter author: ")
+            category = input("Enter category: ")
+            item_id = int(input("Enter item ID: "))
+
+            if item_type == 'book':
+                item = Book(title, author, category, item_id)
+            elif item_type == 'magazine':
+                item = Magazine(title, author, category, item_id)
+            elif item_type == 'dvd':
+                item = DVD(title, author, category, item_id)
+            else:
+                print("Invalid item type.")
+                continue
+
+            library.add_item(item)
+
+        elif choice == '2':
+            item_id = int(input("Enter item ID to check out: "))
+            library.check_out_item(item_id)
+
+        elif choice == '3':
+            item_id = int(input("Enter item ID to return: "))
+            library.return_item(item_id)
+
+        elif choice == '4':
+            library.manage_overdue_fines()
+
+        elif choice == '5':
+            search_term = input("Enter search term: ")
+            search_type = input("Search by (title/author/category): ").lower()
+            results = library.search_items(search_term, search_type)
+            print("\nSearch Results:")
+            for item in results:
+                print(item)
+
+        elif choice == '6':
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
